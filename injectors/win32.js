@@ -52,7 +52,7 @@ exports.inject = async () => {
   await Promise.all([
     writeFile(
       join(appDir, 'index.js'),
-      `require('${join(__dirname, '..', 'src', 'patcher.js').replace(/\\/g, '\\\\')}')`
+      `require('${join(__dirname, '..', 'src', 'patcher.js').replace(/\\/g, '\\\\').replace(/\'/, '\\\'')}')`
     ),
     writeFile(
       join(appDir, 'package.json'),
