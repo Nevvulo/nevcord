@@ -5,13 +5,13 @@ const plugins = (() => {
 
   require('fs')
     .readdirSync(__dirname)
-    .filter(file => file !== 'index.js')
+    .filter(file => file !== 'index.js' && file.endsWith('.js'))
     .map(filename => {
       const moduleName = filename.split('.')[0];
       const PluginClass = require(`${__dirname}/${filename}`);
       plugins[moduleName] = new PluginClass();
     });
-
+    console.log(Object.values(plugins));
   return plugins;
 })();
 
@@ -19,8 +19,9 @@ const startPlugins = (stage) =>
   Object.values(plugins)
     .filter(plugin => plugin.options.stage === stage)
     .map(async (plugin) => {
+      console.log(plugin.options.dependencies)
       while (!plugin.options.dependencies.every(pluginName => (
-        aethcord.plugins.get(pluginName).ready
+        pluginName ? aethcord.plugins.get(pluginName).ready : true
       ))) {
         await sleep(5);
       }

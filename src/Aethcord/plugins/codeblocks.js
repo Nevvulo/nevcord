@@ -30,7 +30,8 @@ module.exports = class Codeblocks extends Plugin {
 
     codeblock.appendChild(
       createElement('button', {
-        className: 'aethcord-codeblock-copy-btn',
+        className: 'codeblock-copy-btn',
+        style: `background-color: #282727;color: white;border: 1.5px solid #212020;border-radius: 5px;float: right;position: relative;top: -5px;`,
         innerHTML: 'copy',
         onclick: () => {
           const range = document.createRange();
