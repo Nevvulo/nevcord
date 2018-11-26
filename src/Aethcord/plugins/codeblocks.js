@@ -33,12 +33,12 @@ module.exports = class Codeblocks extends Plugin {
     codeblock.children[0].appendChild(
       createElement('button', {
         className: 'codeblock-copy-btn',
-        style: `background-color: #282727;color: white;border: 1.5px solid #212020;border-radius: 5px;float: right;position: absolute;top: 7px;right:10px;`,
+        style: `background-color: #282727;color: white;border: 1.5px solid #212020;border-radius: 5px;float: right;position: absolute;top: 4px;right:4px;`,
         innerHTML: 'copy',
         onclick: () => {
           const range = document.createRange();
           range.selectNode(codeblock.children[0]);
-          clipboard.writeText(range.toString());
+          clipboard.writeText(range.toString().split('').slice(0, -4).join(''));
         }
       })
     );
