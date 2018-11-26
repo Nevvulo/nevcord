@@ -8,10 +8,35 @@
     "createBotMessage",
     "parse"
   ]],
+  
+  "http": [
+    "getAPIBaseURL",
+    "get",
+    "put",
+    "post"
+  ],
+
+  "constants": [
+    "Endpoints",
+    "AuditLogActionTypes",
+    "AutoCompleteResultTypes",
+    "BITRATE_DEFAULT"
+  ],
 
   "channels": [
     "getChannelId",
     "getLastSelectedChannelId",
     "getVoiceChannelId"
+  ],
+
+  "spotify": [
+    "play",
+    "pause",
+    "fetchIsSpotifyProtocolRegistered"
+  ],
+
+  "reactDOM": [
+    "render",
+    "createPortal"
   ]
 }

@@ -1,18 +1,18 @@
 const sleep = require('@ac/sleep');
 
 const plugins = (() => {
-  const plugins = {};
+  const _plugins = {};
 
   require('fs')
     .readdirSync(__dirname)
-    .filter(file => file !== 'index.js' && file.endsWith('.js'))
-    .map(filename => {
+    .filter(file => file !== 'index.js')
+    .forEach(filename => {
       const moduleName = filename.split('.')[0];
       const PluginClass = require(`${__dirname}/${filename}`);
-      plugins[moduleName] = new PluginClass();
+      _plugins[moduleName] = new PluginClass();
     });
-    console.log(Object.values(plugins));
-  return plugins;
+
+  return _plugins;
 })();
 
 const startPlugins = (stage) =>

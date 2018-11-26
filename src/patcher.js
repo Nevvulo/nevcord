@@ -6,7 +6,7 @@ const { join, dirname } = require('path');
 class PatchedBrowserWindow extends BrowserWindow {
   constructor (opts) {
     if (opts.webPreferences && opts.webPreferences.preload) {
-      process.env.originalPreload = opts.webPreferences.preload
+      process.env.originalPreload = opts.webPreferences.preload;
       opts.webPreferences.preload = join(__dirname, 'preload');
       opts.webPreferences.nodeIntegration = true;
     }
@@ -21,10 +21,7 @@ app.on('ready', () => {
       .filter(k => (/^content-security-policy/i).test(k))
       .map(k => (delete responseHeaders[k]));
 
-    done({
-      responseHeaders,
-      cancel: false
-    });
+    done({ responseHeaders });
   });
   
   const electronCacheEntry = require.cache[require.resolve('electron')];
@@ -35,7 +32,7 @@ app.on('ready', () => {
   });
   electronCacheEntry.exports.BrowserWindow = PatchedBrowserWindow;
 
-  const discordPath = join(dirname(require.main.filename), '..', 'app.asar')
+  const discordPath = join(dirname(require.main.filename), '..', 'app.asar');
 
   require('module')
     ._load(
