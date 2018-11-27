@@ -35,7 +35,19 @@
     "fetchIsSpotifyProtocolRegistered"
   ],
 
-  "reactDOM": [
+  "spotifySocket": [
+    "getActiveSocketAndDevice",
+    "getPlayerState",
+    "hasConnectedAccount"
+  ],
+
+  "React": [
+    "createElement",
+    "Component",
+    "PureComponent"
+  ],
+
+  "ReactDOM": [
     "render",
     "createPortal"
   ]
