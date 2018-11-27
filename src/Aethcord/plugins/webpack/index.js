@@ -1,7 +1,8 @@
-const { Plugin, sleep } = require('@ac');
+const { sleep } = require('@ac');
+const Plugin = require('@ac/Plugin');
 
 const modules = require('./modules.json');
-
+console.log(Plugin)
 module.exports = class Webpack extends Plugin {
   constructor () {
     super({

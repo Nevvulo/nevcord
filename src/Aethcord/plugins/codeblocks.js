@@ -29,12 +29,12 @@ module.exports = class Codeblocks extends Plugin {
       .map(l => `<li>${l}</li>`)
       .join('') + '</ol>';
 
-    codeblock.style += 'overflow: hidden;position: relative;'
+    codeblock.style += 'overflow: hidden;position: relative;';
 
     codeblock.children[0].appendChild(
       createElement('button', {
         className: 'codeblock-copy-btn',
-        style: `background-color: #282727;color: white;border: 1.5px solid #212020;border-radius: 5px;float: right;position: absolute;top: 4px;right:4px;`,
+        style: 'background-color: #282727;color: white;border: 1.5px solid #212020;border-radius: 5px;float: right;position: absolute;top: 4px;right:4px;',
         innerHTML: 'copy',
         onclick: () => {
           const range = document.createRange();
