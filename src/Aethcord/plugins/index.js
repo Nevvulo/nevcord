@@ -19,7 +19,6 @@ const startPlugins = (stage) =>
   Object.values(plugins)
     .filter(plugin => plugin.options.stage === stage)
     .map(async (plugin) => {
-      console.log(plugin.options.dependencies)
       while (!plugin.options.dependencies.every(pluginName => (
         pluginName ? aethcord.plugins.get(pluginName).ready : true
       ))) {
