@@ -18,7 +18,7 @@ module.exports = class Codeblocks extends Plugin {
   }
 
   inject (codeblock) {
-    if (codeblock.children[0]) {
+    if (codeblock.querySelector('.aethcord-codeblock-copy-btn') || codeblock.closest('.search-result-message')) {
       return;
     }
 
@@ -29,17 +29,42 @@ module.exports = class Codeblocks extends Plugin {
       .map(l => `<li>${l}</li>`)
       .join('') + '</ol>';
 
+    const lang = codeblock.className.split(' ').filter(c => !c.includes('-') && c !== 'hljs');
+    if (lang.length !== 0) {
+      codeblock.appendChild(
+        createElement('div', {
+          className: 'aethcord-codeblock-lang',
+          innerHTML: lang[0]
+        })
+      );
+    }
     codeblock.style += 'overflow: hidden;position: relative;';
-
-    codeblock.children[0].appendChild(
+    codeblock.appendChild(
       createElement('button', {
         className: 'codeblock-copy-btn',
         style: 'background-color: #282727;color: white;border: 1.5px solid #212020;border-radius: 5px;float: right;position: absolute;top: 4px;right:4px;',
         innerHTML: 'copy',
-        onclick: () => {
+        onclick: (e) => {
+          if (e.target.classList.contains('copied')) {
+            return;
+          }
+
+          e.target.innerText = 'copied!';
+          e.target.classList.add('copied');
+          setTimeout(() => {
+            e.target.innerText = 'copy';
+            e.target.classList.remove('copied');
+          }, 1000);
           const range = document.createRange();
           range.selectNode(codeblock.children[0]);
-          clipboard.writeText(range.toString().split('').slice(0, -4).join(''));
+
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+
+          clipboard.writeText(selection.toString());
+
+          selection.removeAllRanges();
         }
       })
     );

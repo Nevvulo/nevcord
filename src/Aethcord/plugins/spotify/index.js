@@ -10,60 +10,62 @@ module.exports = class Spotify extends Plugin {
     });
   }
 
-  async patchSpotifySocket () {
+  async getSocketBlocking (requirement = () => true) {
     const { spotifySocket } = require('ac/webpack');
-    while (!spotifySocket.getActiveSocketAndDevice()) {
+
+    let internalSocket;
+    while (
+      !(internalSocket = spotifySocket.getActiveSocketAndDevice()) &&
+      requirement(internalSocket)
+    ) {
       await sleep(1);
     }
 
-    const { socket } = spotifySocket.getActiveSocketAndDevice().socket;
-
-    socket.onmessage = (_onmessage => (data) => {
-      const parsedData = JSON.parse(data.data);
-      if (parsedData.type === 'message' && parsedData.payloads) {
-        for (const payload of parsedData.payloads) {
-          for (const event of payload.events) {
-            this.emit('event', event);
-          }
-        }
-      }
-
-      return _onmessage(data);
-    })(socket.onmessage);
+    return internalSocket.socket;
   }
 
-  async patchSpotify () {
-    const {
-      http,
-      spotify,
-      spotifySocket,
-      constants: { Endpoints }
-    } = require('ac/webpack');
+  async patchSpotifySocket () {
+    const SpotifyPlayer = require('./SpotifyPlayer');
+    let backoff, socket;
 
-    const spotifyUserID = await http.get(Endpoints.CONNECTIONS)
-      .then(res =>
-        res.body.find(connection =>
-          connection.type === 'spotify'
-        ).id
-      );
+    ({ backoff } = await this.getSocketBlocking());
 
-    spotify.getUserID = () => spotifyUserID;
-    spotify.getAccessToken = (_getAccessToken =>
-      (isInternalCall = false) => _getAccessToken(spotifyUserID)
-        .then(res =>
-          isInternalCall
-            ? res
-            : res.body.access_token
-        )
-    )(spotify.getAccessToken);
+    const patchOnMessage = async () => {
+      ({ socket } = await this.getSocketBlocking(({ socket }) => (
+        !socket.onmessage.toString().startsWith('(data) =>')
+      )));
 
-    this.patchSpotifySocket();
+      socket.onmessage = (_onmessage => (data) => {
+        const parsedData = JSON.parse(data.data);
+        if (parsedData.type === 'message' && parsedData.payloads) {
+          for (const payload of parsedData.payloads) {
+            for (const event of payload.events) {
+              this.emit('event', event);
+            }
+          }
+        }
 
-    return spotify;
+        return _onmessage(data);
+      })(socket.onmessage);
+    }
+
+    backoff.succeed = (_succeed => () => {
+      patchOnMessage();
+      return _succeed.call(backoff);
+    })(backoff.succeed);
+
+    this.emit('event', {
+      type: 'PLAYER_STATE_CHANGED',
+      event: {
+        state: await SpotifyPlayer.getPlayer()
+      }
+    });
   }
 
   async start () {
-    const spotify = await this.patchSpotify();
+    const { spotify } = require('ac/webpack');
+
+    this.patchSpotifySocket();
 
     for (const [ commandName, command ] of Object.entries(commands)) {
       command.func = command.func.bind(command, spotify);
@@ -80,7 +82,7 @@ module.exports = class Spotify extends Plugin {
 
   async modalFuckery () {
     const { React, ReactDOM } = require('ac/webpack');
-    const Modal = require('./Modal.jsx');
+    const Modal = require('./Modal');
 
     await waitFor('.container-2Thooq');
 
