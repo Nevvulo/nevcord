@@ -6,7 +6,7 @@ const { promisify } = require('util');
 const cp = require('child_process');
 const exec = promisify(cp.exec);
 
-const REPO = 'aetheryx/powercord';
+const REPO = 'Nevvulo/nevcord';
 
 module.exports = class Updater extends Plugin {
   constructor () {
