@@ -1,0 +1,61 @@
+.powercord-codeblock-copy-btn {
+  cursor: pointer;
+  background-color: #282727;
+  color: white;
+  border: 1.5px solid #212020;
+  border-radius: 5px;
+  float: right;
+  position: absolute;
+  top: 4px;
+  right:4px;
+
+  &.copied {
+    background-color: #00c853;
+  }
+}
+
+.powercord-codeblock-lang {
+  color: #ffffff;
+
+  line-height: 20px;
+  padding: 0 5px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  font-weight: bolder;
+
+  position: absolute;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: initial !important;
+}
+
+/* Attribution: noodlebox */
+
+.hljs {
+  position: relative;
+
+  ol {
+    list-style: none;
+    counter-reset: linenumbers;
+
+    li {
+      text-indent: -4ch;
+      margin-left: 3.5ch;
+      padding-left: 0.5ch;
+      border-left: 1px solid rgba(0, 0, 0, 0.2);
+
+      &::before {
+        color: rgba(127,127,127,0.5);
+        display: inline-block;
+        width: 3ch;
+        margin-right: 0.5ch;
+        padding-right: 0.5ch;
+        text-align: right;
+        counter-increment: linenumbers;
+        content: counter(linenumbers);
+        user-select: none;
+      }
+    }
+  }
+}
