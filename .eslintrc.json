@@ -4,9 +4,15 @@
     "webpackJsonp": true
   },
   "parserOptions": {
-    "ecmaVersion": 8,
-    "sourceType": "script"
+    "ecmaVersion": 2018,
+    "sourceType": "script",
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
+  "plugins": [
+    "react"
+  ],
   "env": {
     "node": true,
     "es6": true,
@@ -36,7 +42,6 @@
       "skipRegExps": true
     }],
     "no-obj-calls": [ "error" ],
-    "no-prototype-builtins": [ "error" ],
     "no-regex-spaces": [ "error" ],
     "no-sparse-arrays": [ "error" ],
     "no-template-curly-in-string": [ "error" ],
@@ -107,7 +112,6 @@
     "no-useless-concat": [ "error" ],
     "no-useless-escape": [ "error" ],
     "no-useless-return": [ "error" ],
-    "no-void": [ "error" ],
     "no-warning-comments": [ "error" ],
     "no-with": [ "error" ],
     "prefer-promise-reject-errors": ["error", {
@@ -179,7 +183,6 @@
       }
     }],
     "padded-blocks": [ "error", "never" ],
-    "prefer-object-spread": [ "error" ],
     "quote-props": [ "error", "as-needed" ],
     "quotes": [ "error", "single" ],
     "semi": [ "error", "always" ],
@@ -240,6 +243,7 @@
     "prefer-template": [ "error" ],
     "rest-spread-spacing": [ "error", "never" ],
     "symbol-description": [ "error" ],
-    "template-curly-spacing": [ "error", "never" ]
+    "template-curly-spacing": [ "error", "never" ],
+    "react/jsx-uses-vars": 1
   }
 }

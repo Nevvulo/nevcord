@@ -1,14 +1,15 @@
 const EventEmitter = require('events');
 
 const modules = require('./modules');
-
-const isOverlay = location.pathname === '/overlay';
+const PluginManager = require('./pluginManager');
+const SettingsManager = require('./settingsManager');
 
 module.exports = class Powercord extends EventEmitter {
-  constructor (config) {
+  constructor () {
     super();
 
-    this.config = config;
+    this.pluginManager = new PluginManager();
+    this.settingsManager = new SettingsManager('general');
     this.patchWebSocket();
 
     if (document.readyState === 'loading') {
@@ -34,23 +35,6 @@ module.exports = class Powercord extends EventEmitter {
 
   async init () {
     await Promise.all(modules.map(mdl => mdl()));
-    this.startPlugins();
-  }
-
-  async startPlugins () {
-    const plugins = new Map(Object.entries(require('./plugins')));
-    this.plugins = plugins;
-
-    for (const plugin of [ ...plugins.values() ]) {
-      if (
-        (plugin.options.appMode === 'overlay' && isOverlay) ||
-        (plugin.options.appMode === 'app' && !isOverlay) ||
-        plugin.options.appMode === 'both'
-      ) {
-        plugin._start();
-      } else {
-        plugins.delete(plugin);
-      }
-    }
+    this.pluginManager.startPlugins();
   }
 };
