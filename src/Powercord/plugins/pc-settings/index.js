@@ -4,9 +4,7 @@ const GeneralSettings = require('./GeneralSettings.jsx');
 
 module.exports = class Settings extends Plugin {
   constructor () {
-    super({
-      dependencies: [ 'pc-classNameNormalizer' ] // Required by some components
-    });
+    super();
 
     this.sections = [];
   }
@@ -35,7 +33,7 @@ module.exports = class Settings extends Plugin {
   patchExperiments () {
     const experimentsModule = getModule(r => r.isDeveloper !== void 0);
     Object.defineProperty(experimentsModule, 'isDeveloper', {
-      get: () => powercord.settingsManager.get('experiments', false)
+      get: () => powercord.settings.get('experiments', false)
     });
   }
 
@@ -55,13 +53,31 @@ module.exports = class Settings extends Plugin {
           { section: 'DIVIDER' }
         );
       }
+
+      if (sections.find(c => c.section === 'CUSTOM')) {
+        sections.find(c => c.section === 'CUSTOM').element = ((_element) => function () { // eslint-disable-line
+          const res = _element();
+          if (res.props.children.length === 3) {
+            res.props.children.unshift(
+              Object.assign({}, res.props.children[0], {
+                props: Object.assign({}, res.props.children[0].props, {
+                  href: 'https://powercord.xyz',
+                  title: 'Powercord',
+                  className: `${res.props.children[0].props.className} powercord-pc-icon`
+                })
+              })
+            );
+          }
+          return res;
+        })(sections.find(c => c.section === 'CUSTOM').element);
+      }
+
       return sections;
     })(SettingsView.prototype.getPredicateSections, this.sections);
 
-    SettingsView.prototype.componentDidCatch = (_componentDidCatch => (...args) => {
-      this.error('nee jij discord :)');
-      return _componentDidCatch(...args);
-    })(SettingsView.prototype.componentDidCatch);
+    SettingsView.prototype.componentDidCatch = () => {
+      this.error('nee jij discord :) (There should be an error just before this message)');
+    };
   }
 
   _renderSettingsPanel (title, contents) {

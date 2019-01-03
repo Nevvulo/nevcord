@@ -5,14 +5,8 @@ const { resolve } = require('path');
 const Settings = require('./components/Settings.jsx');
 
 module.exports = class PluginManager extends Plugin {
-  constructor () {
-    super({
-      dependencies: [ 'pc-settings' ]
-    });
-  }
-
   async start () {
-    this.loadCSS(resolve(__dirname, 'style.scss'));
+    this.loadCSS(resolve(__dirname, 'scss', 'style.scss'));
 
     powercord
       .pluginManager

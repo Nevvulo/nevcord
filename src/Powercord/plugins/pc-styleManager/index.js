@@ -9,10 +9,7 @@ const { resolve, dirname } = require('path');
 // @todo: Install and manage themes using StyleManager
 module.exports = class StyleManager extends Plugin {
   constructor () {
-    super({
-      appMode: 'both',
-      dependencies: [ 'pc-classNameNormalizer', 'pc-settings' ]
-    });
+    super();
 
     this.themesDir = resolve(__dirname, 'themes');
     this.discordClassNames = [];
@@ -31,7 +28,7 @@ module.exports = class StyleManager extends Plugin {
     this.worker.onmessage = this._handleFinishedCompiling.bind(this);
 
     // Load global css
-    await this.load('pc-contextMenu', resolve(__dirname, 'styles', 'contextMenu.scss'));
+    this.load('Powercord-Globals', resolve(__dirname, 'styles', 'index.scss'));
 
     // Load themes @todo: Use a manifest to get file
     const dir = await readdir(this.themesDir);
@@ -44,12 +41,12 @@ module.exports = class StyleManager extends Plugin {
       const file = resolve(this.themesDir, filename);
       const watcher = chokidar.watch(file);
       this.trackedFiles.push({
-        id: `theme-${styleId}`,
+        id: `Theme-${styleId}`,
         file: file.replace(/\\/g, '/'),
         includes: [],
         watchers: [ watcher ]
       });
-      await this._applyStyle(`theme-${styleId}`, file, true);
+      await this._applyStyle(`Theme-${styleId}`, file, true);
       watcher.on('change', this.update.bind(this));
     }
   }
@@ -109,7 +106,12 @@ module.exports = class StyleManager extends Plugin {
           render({
             data: css,
             includePaths: [ dirname(file) ],
-            importer: (url, prev) => ({ file: resolve(dirname(decodeURI(prev)), url).replace(/\\/g, '/') })
+            importer: (url, prev) => {
+              const prevFile = prev === 'stdin' ? file : prev.replace(/https?:\/\/(?:[a-z]+\.)?discordapp\.com/i, '');
+              return {
+                file: resolve(dirname(decodeURI(prevFile)), url).replace(/\\/g, '/')
+              };
+            }
           }, (err, compiled) => {
             if (err) {
               return rej(err);

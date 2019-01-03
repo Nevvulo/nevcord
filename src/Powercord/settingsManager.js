@@ -1,33 +1,56 @@
 const { resolve } = require('path');
 const { writeFile } = require('fs');
 
-let config;
-try {
-  config = require('../../config.json');
-} catch (e) {
-  config = {};
-}
-
 module.exports = class SettingsManager {
   constructor (category) {
-    this.category = category || 'general';
-    this.config = config[this.category] || {};
+    if (!category) {
+      throw new TypeError('Missing SettingsManager category name');
+    }
+
+    this.category = category.startsWith('pc-') ? category : `pc-${category}`;
+    this.config = this._readFromLS();
   }
 
-  get (key, defaultValue) {
-    const value = this.config[key];
-    return (value === void 0 || value === null)
+  _readFromLS () {
+    const entry = localStorage.getItem(this.category);
+    try {
+      return JSON.parse(entry) || {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  get (nodePath, defaultValue) {
+    const nodePaths = nodePath.split('.');
+    let currentNode = this.config;
+
+    for (const fragment of nodePaths) {
+      currentNode = currentNode[fragment];
+    }
+
+    return (currentNode === void 0 || currentNode === null)
       ? defaultValue
-      : value;
+      : currentNode;
   }
 
-  set (key, value) {
-    this.config[key] = value;
+  set (nodePath, value) {
+    const nodePaths = nodePath.split('.');
+    let currentNode = this.config;
+
+    for (const fragment of nodePaths) {
+      if (nodePaths.indexOf(fragment) === nodePaths.length - 1) {
+        currentNode[fragment] = value;
+      } else if (!currentNode[fragment]) {
+        currentNode[fragment] = {};
+      }
+
+      currentNode = currentNode[fragment];
+    }
+
     this._save();
   }
 
   _save () {
-    const cfg = Object.assign({}, config, { [this.category]: this.config });
-    writeFile(resolve(__dirname, '..', '..', 'config.json'), JSON.stringify(cfg, null, 2), () => null);
+    localStorage.setItem(this.category, JSON.stringify(this.config));
   }
 };
