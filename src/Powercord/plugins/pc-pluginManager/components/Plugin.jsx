@@ -1,7 +1,7 @@
 const { shell: { openExternal } } = require('electron');
 const { React } = require('powercord/webpack');
 const { Tooltip, Switch, Button, Spinner } = require('powercord/components');
-const { Author, Version, Description, License } = require('./Icons');
+const { Author, Version, Description, License, Info } = require('./Icons');
 
 module.exports = class Plugin extends React.Component {
   constructor (props) {
@@ -14,9 +14,11 @@ module.exports = class Plugin extends React.Component {
 
   render () {
     const {
-      id, enforced, installed, enabled, awaitingReload, manifest, // Properties
-      onEnable, onDisable, onInstall, onUninstall // Events
+      id, enforced, installed, enabled, hidden, awaitingReload, manifest, // Properties
+      onEnable, onDisable, onInstall, onUninstall, onShow, onHide // Events
     } = this.props;
+    const versionInt = parseInt(manifest.version.replace(/\./g, ''));
+
     return <div className='powercord-plugin'>
       <div className='powercord-plugin-header'>
         <h4>{manifest.name}</h4>
@@ -41,6 +43,9 @@ module.exports = class Plugin extends React.Component {
             <Version/>
           </Tooltip>
           <span>v{manifest.version}</span>
+          {versionInt < 100 && <Tooltip text='This plugin is in beta' position='top'>
+            <Info/>
+          </Tooltip>}
         </div>
         <div className='license'>
           <Tooltip text='License' position='top'>
@@ -63,21 +68,24 @@ module.exports = class Plugin extends React.Component {
           Repository
         </Button>
 
-        {enforced && <Tooltip text="You can't hide this plugin" position='top'>
-          <Button disabled className={Button.Colors.RED}>Hide</Button>
-        </Tooltip>}
-
-        {!enforced && (awaitingReload
-          ? <Button disabled className={Button.Colors.YELLOW}>Awaiting Reload</Button>
-          : <Button
-            disabled={this.state.installing}
-            onClick={() => this.process(installed ? onInstall : onUninstall)}
-            className={installed ? Button.Colors.RED : Button.Colors.GREEN}
-          >
-            {this.state.installing
-              ? <Spinner type='pulsingEllipsis'/>
-              : (installed ? (id.startsWith('pc-') ? 'Hide' : 'Uninstall') : 'Install')}
-          </Button>)}
+        <div className='btn-group'>
+          <Button
+            onClick={() => hidden ? onShow() : onHide()}
+            className={hidden ? Button.Colors.GREEN : Button.Colors.TRANSPARENT}>
+            {hidden ? 'Show' : 'Hide'}
+          </Button>
+          {!id.startsWith('pc-') && (awaitingReload
+            ? <Button disabled className={Button.Colors.YELLOW}>Awaiting Reload</Button>
+            : <Button
+              disabled={this.state.installing}
+              onClick={() => this.process(installed ? onInstall : onUninstall)}
+              className={installed ? Button.Colors.RED : Button.Colors.GREEN}
+            >
+              {this.state.installing
+                ? <Spinner type='pulsingEllipsis'/>
+                : (installed ? 'Uninstall' : 'Install')}
+            </Button>)}
+        </div>
       </div>
     </div>;
   }

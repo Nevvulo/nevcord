@@ -1,7 +1,7 @@
 const { waitFor, getOwnerInstance, sleep } = require('powercord/util');
 
 module.exports = async function injectAutocomplete () {
-  const prefix = powercord.settings.get('prefix', '.');
+  const _this = this;
 
   const plugins = [ ...powercord.pluginManager.plugins.keys() ];
   while (!plugins.every(plugin =>
@@ -18,11 +18,11 @@ module.exports = async function injectAutocomplete () {
 
   const inject = () =>
     this.instance.props.autocompleteOptions.POWERCORD_CUSTOM_COMMANDS = {
-      getText: (index, { commands }) => prefix + commands[index].command,
-      matches: () => this.instance.props.value.startsWith(prefix),
+      getText: (index, { commands }) => this.prefix + commands[index].command,
+      matches: (isValid) => isValid && this.instance.props.value.startsWith(this.prefix),
       queryResults: () => ({
         commands: customCommands.filter(c =>
-          c.command.startsWith(this.instance.props.value.slice(prefix.length))
+          c.command.startsWith(this.instance.props.value.slice(this.prefix.length))
         )
       }),
       renderResults: (...args) => {
@@ -43,7 +43,7 @@ module.exports = async function injectAutocomplete () {
             ) {
               const commandPreviewChildren = rendered.props.children[1].props.children;
               if (commandPreviewChildren[0].startsWith('/')) {
-                commandPreviewChildren[0] = commandPreviewChildren[0].replace(`/${prefix.slice(1)}`, prefix);
+                commandPreviewChildren[0] = commandPreviewChildren[0].replace(`/${_this.prefix.slice(1)}`, _this.prefix);
               }
             }
 
@@ -52,6 +52,7 @@ module.exports = async function injectAutocomplete () {
         };
 
         for (const command of commands) {
+          const _this = this;
           command.type = class PatchedCommandType extends command.type {
             renderContent (...originalArgs) {
               const rendered = super.renderContent(...originalArgs);
@@ -62,8 +63,8 @@ module.exports = async function injectAutocomplete () {
               }
 
               const commandName = children[0].props;
-              if (!commandName.children.startsWith(prefix)) {
-                commandName.children = prefix + commandName.children;
+              if (!commandName.children.startsWith(_this.prefix)) {
+                commandName.children = _this.prefix + commandName.children;
               }
 
               return rendered;
