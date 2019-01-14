@@ -1,11 +1,12 @@
 const http = require('http');
 const { shell: { openExternal } } = require('electron');
-const { React } = require('powercord/webpack');
+const { React, Flux } = require('powercord/webpack');
 const { Spinner } = require('powercord/components');
 
-module.exports = class Account extends React.Component {
+const Account = class Account extends React.Component {
   constructor (props) {
     super(props);
+
     this.state = {
       linking: false,
       message: null,
@@ -18,8 +19,10 @@ module.exports = class Account extends React.Component {
     const baseUrl = powercord.settings.get('backendURL', 'https://powercord.xyz');
 
     let Component = null;
-    if (this.state.linking) {
-      Component = () => <div><Spinner type='pulsingEllipsis'/> Linking your Powercord account...</div>;
+    if (this.props.streamerMode.enabled && this.props.streamerMode.hidePersonalInformation) {
+      Component = () => <div>Streamer mode enabled. Stay safe cutie</div>;
+    } else if (this.state.linking) {
+      Component = () => <div><Spinner type='pulsingEllipsis'/> Linking your account...</div>;
     } else if (powercord.account) {
       Component = () => <div>
         <img src={`${baseUrl}/assets/spotify.png`} alt='Spotify'/>
@@ -38,12 +41,13 @@ module.exports = class Account extends React.Component {
       </div>;
     } else {
       Component = () => <div>
-        {this.state.message || 'You haven\'t linked your Powercord account.'}
+        {this.state.message || 'You haven\'t linked your account yet.'}
         <a href='#' onClick={() => this.link()}>Link it now</a>
       </div>;
     }
 
     return <div className='powercord-account'>
+      <div className='powercord-title'>Powercord Account</div>
       <Component/>
     </div>;
   }
@@ -143,3 +147,6 @@ module.exports = class Account extends React.Component {
     });
   }
 };
+
+const fluxShit = Object.values(require('powercord/webpack').instance.cache).filter(m => m.exports && m.exports.cacheKey && m.exports.cacheKey === 'StreamerModeStore')[0].exports;
+module.exports = Flux.connectStores([ fluxShit ], () => ({ streamerMode: fluxShit.getSettings() }))(Account);
