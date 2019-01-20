@@ -1,4 +1,5 @@
 const Plugin = require('powercord/Plugin');
+const { inject, uninject } = require('powercord/injector');
 const { getModuleByDisplayName } = require('powercord/webpack');
 const { resolve } = require('path');
 
@@ -16,24 +17,39 @@ module.exports = class PluginManager extends Plugin {
     this._inject();
   }
 
+  unload () {
+    this.unloadCSS();
+    uninject('pc-pluginManager-reloadIcon');
+    powercord
+      .pluginManager
+      .get('pc-settings')
+      .unregister('pc-keybinds');
+  }
+
   _inject () {
     const HeaderBar = getModuleByDisplayName('headerbar');
 
-    // eslint-disable-next-line func-names
-    HeaderBar.prototype.render = (_render => function (...args) {
-      const res = _render.call(this, ...args);
+    inject('pc-pluginManager-reloadIcon', HeaderBar.prototype, 'render', (args, res) => {
       if (powercord.pluginManager.requiresReload) {
+        // isn't that beautiful? thx noodle.js 7
         res.props.children[3].props.children[2].props.children.push(
           Object.assign({}, res.props.children[3].props.children[2].props.children[3], {
             props: Object.assign({}, res.props.children[3].props.children[2].props.children[3].props, {
-              onClick: () => window.location.reload(),
-              tooltip: 'Plugin Manager requires reload',
+              children: Object.assign({}, res.props.children[3].props.children[2].props.children[3].props.children, {
+                props: Object.assign({}, res.props.children[3].props.children[2].props.children[3].props.children.props, {
+                  tooltip: 'Plugin Manager requires reload'
+                })
+              }),
+              onClick: (e) => {
+                e.preventDefault();
+                window.location.reload();
+              },
               className: 'pc-icon-reload'
             })
           })
         );
       }
       return res;
-    })(HeaderBar.prototype.render);
+    });
   }
 };
